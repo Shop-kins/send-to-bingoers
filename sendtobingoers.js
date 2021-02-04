@@ -37,8 +37,12 @@ ddb.scan(scanParams, async (err, data) => {
   
   var count = 0;
   const postCalls = data.Items.map(async ({ id }) => {
-    const postData = JSON.stringify({position: JSON.parse(event.body).position, colour_count: count});
-    count ++
+    if( event.requestContext.connectionId != id.S){
+      count ++
+    }
+  });
+  const postData = JSON.stringify({position: JSON.parse(event.body).position, colour_count: count});
+  const postCalls = data.Items.map(async ({ id }) => {
     if( event.requestContext.connectionId != id.S){
     try {     
         console.log("Posting " + postData + " to " + id.S)
