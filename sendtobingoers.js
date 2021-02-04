@@ -33,21 +33,20 @@ ddb.scan(scanParams, async (err, data) => {
     apiVersion: '2018-11-29',
     endpoint: event.requestContext.domainName + '/' + event.requestContext.stage
   });
-  
-  
-  var count = 0;
-  data.Items.map(({ id }) => {
-    if( event.requestContext.connectionId != id.S){
-      count ++
-    }
-  });
-  const postData = JSON.stringify({position: JSON.parse(event.body).position, colour_count: count});
+  const postData = JSON.stringify({position: JSON.parse(event.body).position, colour_count: 1});
   const postCalls = data.Items.map(async ({ id }) => {
     if( event.requestContext.connectionId != id.S){
     try {     
         console.log("Posting " + postData + " to " + id.S)
         apigwManagementApi.postToConnection({ ConnectionId: id.S, Data: postData }, function(err, data){
-          if (err) console.log(err, err.stack); // an error occurred
+          if (err) {
+             if(err.statusCode == 410){
+               console.log(`Found stale connection, deleting ${id}`);
+               ddb.deleteItem({ TableName: "GridConnections", Key: { id } }).promise();
+             } else {
+               console.log("ERROR " + err)
+             }
+          }// an error occurred
           else console.log(data);           // successful response
         });
     } catch (e) {
