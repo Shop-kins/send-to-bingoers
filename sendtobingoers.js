@@ -34,7 +34,7 @@ ddb.scan(scanParams, async (err, data) => {
     endpoint: event.requestContext.domainName + '/' + event.requestContext.stage
   });
   
-  const postData = {position: JSON.parse(event.body).position, from_id: event.requestContext.connectionId};
+  const postData = JSON.stringify({position: JSON.parse(event.body).position, from_id: event.requestContext.connectionId});
   
   const postCalls = data.Items.map(async ({ id }) => {
     if( event.requestContext.connectionId != id.S){
