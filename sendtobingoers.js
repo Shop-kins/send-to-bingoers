@@ -12,7 +12,7 @@ exports.handler = function(event, context, callback) {
   
   var scanParams = {
     TableName:"GridConnections",
-    ProjectionExpression: "id, #yr",
+    ProjectionExpression: "id, #yr, colour_count",
     FilterExpression: "#yr = :yyyy",
     ExpressionAttributeNames:{
         "#yr": "room"
@@ -22,7 +22,6 @@ exports.handler = function(event, context, callback) {
     }
 };
 ddb.scan(scanParams, async (err, data) => {
-  
   try {
    
   } catch (e) {
@@ -33,8 +32,9 @@ ddb.scan(scanParams, async (err, data) => {
     apiVersion: '2018-11-29',
     endpoint: event.requestContext.domainName + '/' + event.requestContext.stage
   });
-  const postData = JSON.stringify({position: JSON.parse(event.body).position, colour_count: 1});
-  const postCalls = data.Items.map(async ({ id }) => {
+
+  const postCalls = data.Items.map(async ({ id, colour_count }) => {
+    const postData = JSON.stringify({position: JSON.parse(event.body).position, colour_count: colour_count.S});
     if( event.requestContext.connectionId != id.S){
     try {     
         console.log("Posting " + postData + " to " + id.S)
