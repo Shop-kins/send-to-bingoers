@@ -36,7 +36,7 @@ ddb.scan(scanParams, async (err, data) => {
   
   
   var count = 0;
-  const postCalls = data.Items.map(async ({ id }) => {
+  data.Items.map(({ id }) => {
     if( event.requestContext.connectionId != id.S){
       count ++
     }
