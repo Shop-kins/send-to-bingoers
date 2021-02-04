@@ -34,11 +34,13 @@ ddb.scan(scanParams, async (err, data) => {
     endpoint: event.requestContext.domainName + '/' + event.requestContext.stage
   });
   
-  const postData = JSON.stringify({position: JSON.parse(event.body).position, from_id: event.requestContext.connectionId});
   
+  var count = 0;
   const postCalls = data.Items.map(async ({ id }) => {
+    const postData = JSON.stringify({position: JSON.parse(event.body).position, colour_count: count});
+    count ++
     if( event.requestContext.connectionId != id.S){
-    try {
+    try {     
         console.log("Posting " + postData + " to " + id.S)
         apigwManagementApi.postToConnection({ ConnectionId: id.S, Data: postData }, function(err, data){
           if (err) console.log(err, err.stack); // an error occurred
