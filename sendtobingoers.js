@@ -22,19 +22,22 @@ exports.handler = function(event, context, callback) {
     }
 };
 ddb.scan(scanParams, async (err, data) => {
+  console.log(err)
   try {
    
   } catch (e) {
     return { statusCode: 500, body: e.stack };
   }
   
+  var count = data.Items.find(element => element.id.S == event.requestContext.connectionId).colour_count;
+  
   const apigwManagementApi = new AWS.ApiGatewayManagementApi({
     apiVersion: '2018-11-29',
     endpoint: event.requestContext.domainName + '/' + event.requestContext.stage
   });
 
-  const postCalls = data.Items.map(async ({ id, colour_count }) => {
-    const postData = JSON.stringify({position: JSON.parse(event.body).position, colour_count: colour_count.S});
+  const postCalls = data.Items.map(async ({ id }) => {
+    const postData = JSON.stringify({position: JSON.parse(event.body).position, colour_count: count.S});
     if( event.requestContext.connectionId != id.S){
     try {     
         console.log("Posting " + postData + " to " + id.S)
